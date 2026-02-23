@@ -3,7 +3,7 @@ import axios from "axios";
 
 const AuthContext = createContext();
 
-const API = axios.create({ baseURL: "https://highway-incident-reporting.onrender.com" });
+const API = axios.create({ baseURL: "https://nhai-incident-app-1.onrender.com/api" });
 
 // Attach JWT to every request
 API.interceptors.request.use((config) => {
