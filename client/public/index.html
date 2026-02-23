@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- ✅ PWA Manifest — handles theme color for ALL browsers -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- ✅ Fallback theme-color for older browsers -->
+    <meta name="theme-color" content="#060E1A" />
+
+    <!-- ✅ iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="NHAI Incident" />
+
+    <!-- ✅ SEO -->
+    <meta name="description" content="NHAI Highway Incident Reporting System — Report accidents, potholes and obstructions on national highways in real time." />
+    <meta name="keywords" content="NHAI, highway, incident, reporting, accident, pothole, road safety" />
+    <meta name="author" content="National Highways Authority of India" />
+
+    <!-- ✅ Open Graph (WhatsApp / LinkedIn preview) -->
+    <meta property="og:title" content="NHAI | Highway Incident Reporting System" />
+    <meta property="og:description" content="Real-time highway incident reporting for NHAI field staff and admins." />
+    <meta property="og:type" content="website" />
+
+    <!-- ✅ Favicon -->
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/favicon.ico" />
+
+    <title>NHAI | Highway Incident Reporting System</title>
+
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { background: #060E1A; }
+      .leaflet-popup-content-wrapper { background: white; border-radius: 8px; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
