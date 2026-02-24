@@ -3,7 +3,7 @@ import axios from "axios";
 
 const AuthContext = createContext();
 
-const API = axios.create({ baseURL: "https://nhai-incident-app-i8up.vercel.app/api" });
+const API = axios.create({ baseURL: "https://nhai-incident-app-i8up.vercel.app/" });
 
 // Attach JWT to every request
 API.interceptors.request.use((config) => {
