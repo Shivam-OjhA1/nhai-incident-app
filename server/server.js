@@ -7,18 +7,13 @@ dotenv.config();
 
 const app = express();
 
-// ✅ CORS Fix
-const allowedOrigins = [
-  "http://localhost:3000",
-  /\.vercel\.app$/,
-];
-
+// ✅ CORS — Allow all Vercel URLs
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    const isAllowed = allowedOrigins.some((allowed) =>
-      typeof allowed === "string" ? allowed === origin : allowed.test(origin)
-    );
+    const isAllowed = !origin ||
+      origin.includes("localhost") ||
+      origin.includes("vercel.app");
     if (isAllowed) callback(null, true);
     else callback(new Error("CORS Not Allowed"));
   },
@@ -27,18 +22,49 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
+// ✅ Handle preflight requests
+app.options("*", cors());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Connect MongoDB once (Vercel serverless safe)
+// ✅ MongoDB connection — persistent across serverless calls
 let isConnected = false;
+
 const connectDB = async () => {
-  if (isConnected) return;
-  await mongoose.connect(process.env.MONGO_URI);
-  isConnected = true;
-  console.log("✅ MongoDB Connected");
+  if (isConnected && mongoose.connection.readyState === 1) {
+    console.log("✅ Using existing MongoDB connection");
+    return;
+  }
+  try {
+    mongoose.set("strictQuery", false);
+    await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+      maxPoolSize: 10,
+      bufferCommands: false,
+    });
+    isConnected = true;
+    console.log("✅ MongoDB Connected Successfully");
+  } catch (err) {
+    console.error("❌ MongoDB Error:", err.message);
+    isConnected = false;
+    throw err;
+  }
 };
-connectDB();
+
+// ✅ Middleware to ensure DB connected on every request
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Database connection failed. Please try again.",
+    });
+  }
+});
 
 // Routes
 app.use("/api/auth", require("./routes/authRoutes"));
@@ -47,7 +73,10 @@ app.use("/api/admin", require("./routes/adminRoutes"));
 
 // Health check
 app.get("/", (req, res) => {
-  res.json({ message: "🚧 Highway Incident Reporting API is running!" });
+  res.json({
+    message: "🚧 Highway Incident Reporting API is running!",
+    db: mongoose.connection.readyState === 1 ? "✅ Connected" : "❌ Disconnected",
+  });
 });
 
 // Global Error Handler
@@ -59,12 +88,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ✅ For local development
+// ✅ Local dev server
 if (process.env.NODE_ENV !== "production") {
-  app.listen(process.env.PORT || 5500, () => {
-    console.log(`🚀 Server running on port ${process.env.PORT || 5500}`);
+  app.listen(process.env.PORT || 5000, () => {
+    console.log(`🚀 Server running on port ${process.env.PORT || 5000}`);
   });
 }
 
-// ✅ Required for Vercel serverless
+// ✅ Required for Vercel
 module.exports = app;
